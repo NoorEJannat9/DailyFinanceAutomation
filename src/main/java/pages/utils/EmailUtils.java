@@ -6,24 +6,33 @@ import java.util.Properties;
 
 public class EmailUtils {
 
-    public static String getResetLink(String username, String password) throws Exception {
+    public static String getResetLink(String username, String appPassword) throws Exception {
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
 
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
-        store.connect("imap.gmail.com", username, password);
+        store.connect("imap.gmail.com", username, appPassword);
 
         Folder inbox = store.getFolder("Inbox");
         inbox.open(Folder.READ_ONLY);
 
-        // Find the latest unread email
+        // Get all unread messages and find the latest one
         Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
-        // This is a simplified version; in a real project, you'd parse the 'content'
-        // of the latest message to find the "https://..." link.
-        String content = messages[messages.length - 1].getContent().toString();
+        if (messages.length == 0) {
+            inbox.close(false);
+            store.close();
+            return null;
+        }
 
-        return content; // You will extract the URL from this string
+        // Get the last (most recent) unread message
+        Message latestMessage = messages[messages.length - 1];
+        String content = latestMessage.getContent().toString();
+
+        inbox.close(false);
+        store.close();
+
+        return content;
     }
 }

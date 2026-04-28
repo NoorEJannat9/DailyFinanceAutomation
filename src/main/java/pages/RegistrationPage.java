@@ -7,19 +7,20 @@ import java.time.Duration;
 
 public class RegistrationPage {
     WebDriver driver;
+
     By emailField = By.xpath("//label[contains(text(),'Email')]/following-sibling::div/input");
 
     public RegistrationPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void register(String fName, String lName, String email, String password, String phone, String address) {
+    public void register(String fName, String lName, String email,
+                         String password, String phone, String address) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         driver.findElement(By.xpath("//label[contains(text(),'First Name')]/following-sibling::div/input")).sendKeys(fName);
         driver.findElement(By.xpath("//label[contains(text(),'Last Name')]/following-sibling::div/input")).sendKeys(lName);
 
-        // This is the most important part to fix your "stacking email" error
         WebElement emailInput = wait.until(ExpectedConditions.elementToBeClickable(emailField));
         emailInput.click();
         emailInput.sendKeys(Keys.CONTROL + "a");
@@ -37,11 +38,12 @@ public class RegistrationPage {
     public boolean isCongratsMessageDisplayed() {
         try {
             return new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'successfully')]")))
+                    .until(ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//*[contains(text(),'successfully') or contains(text(),'Congratulations') or contains(text(),'registered')]")
+                    ))
                     .isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
-
 }
